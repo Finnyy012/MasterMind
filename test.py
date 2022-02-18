@@ -16,6 +16,7 @@ def get_perms():
         perms = itertools.permutations(kleuren, lengte)
     return [p for p in perms]
 
+
 def get_feedback(guess, code):
     kopie_guess = list(guess)
     kopie_code = list(code)
@@ -32,8 +33,10 @@ def get_feedback(guess, code):
     for i in range(lengte):
         if kopie_guess[i] in kopie_code:
             w += 1
+            kopie_code[kopie_code.index(kopie_guess[i])] = 'X'
+            kopie_guess[i] = 'Y'
 
-    return [b,w]
+    return [b, w]
 
 
 
@@ -79,8 +82,8 @@ def guess():
 
 potential = get_perms()
 ex = 0
-i = get_column(potential[1])
-print(potential[1])
+i = get_column(potential[7])
+print(potential[7])
 print(i)
 for j in i:
     t = (j ** 2)

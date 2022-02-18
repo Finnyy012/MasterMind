@@ -2,14 +2,16 @@ import itertools
 import random
 
 def play():
+    # settings en zo
     kleuren = [1,2,3,4,5,6]
     duplicates = True
     max_guesses = 10
-    guesses = []
-    current = 1
     lengte = 4
+
+    current = 1
     potential = []
 
+    # maakt een lijst met alle mogelijke antwoorden
     def get_perms():
         if(duplicates):
             perms = itertools.product(kleuren, repeat=lengte)
@@ -17,7 +19,7 @@ def play():
             perms = itertools.permutations(kleuren, lengte)
         return [p for p in perms]
 
-
+    # geeft feedback in zwarte en witte pins aan de hand van een guess
     def get_feedback(guess, code):
         kopie_guess = list(guess)
         kopie_code = list(code)
@@ -34,16 +36,19 @@ def play():
         for i in range(lengte):
             if kopie_guess[i] in kopie_code:
                 w += 1
+                kopie_code[kopie_code.index(kopie_guess[i])] = 'X'
+                kopie_guess[i] = 'Y'
 
         return [b,w]
 
+    # maakt een random code
     def generate_code():
         if (duplicates):
             return list(random.choices(kleuren, k=lengte))
         else:
             return list(random.sample(kleuren, k=lengte))
 
-
+    # elimineert alle onmogelijke antwoorden aan de hand van een nieuwe guess met feedback
     def eliminate(guess, fb):
         res = []
         for code in potential:
@@ -51,6 +56,7 @@ def play():
                 res.append(code)
         return res
 
+    # maakt een colom met het aantal mogelijke codes waarvoor de guess de feedback zou krijgen die bij die index hoort
     def get_column(guess):
         fb_col = []
         b = 0
@@ -76,37 +82,41 @@ def play():
 
         return res
 
-
+    # zet de colommen om in expected values (met de formule uit het artikel)
+    # en returnt de guess uit de mogelijke guesses met de laagste E[x]
     def get_guess():
-        matrix = []
-        for i in potential:
-            matrix.append(get_column(i))
-
         ex_sizes = []
-        for i in matrix:
+        for i in potential:
+            col = get_column(i)
             ex = 0
-            for j in i:
-                ex += (j**2)/(len(kleuren)**lengte)
+            for j in col:
+                ex += (j ** 2) / (len(kleuren) ** lengte)
             ex_sizes.append(ex)
 
         return potential[ex_sizes.index(min(ex_sizes))]
-
 
     code = generate_code()
     print("code: " + str(code))
     potential = get_perms()
 
-
+    # loop die het spel runt
     while True:
+        ## haal comment weg om tegen de computer te spelen
         # guess = input("guess " + str(current) + "/" + str(max_guesses) + ": ")
         # guess = list(guess)
         # for i in range(len(guess)):
         #     guess[i] = int(guess[i])
 
-        #guess = potential[random.randint(0, len(potential) - 1)]
-        guess = get_guess()
-        print("guess " + str(current) + "/" + str(max_guesses) + ": " + str(guess))
+        ## willekeurige guess strategie; gemiddeld 5.65 guesses uit 20000 runs
+        # guess = potential[random.randint(0, len(potential) - 1)]
 
+        ## eerstvolgende valide guess strategie; gemiddeld 6.77 guesses uit 20000 runs
+        # guess = potential[0]
+
+        ## expected size strategie; gemiddeld 5.472 guesses uit 500 runs (20000 duurde me iets te lang)
+        guess = get_guess()
+
+        print("guess " + str(current) + "/" + str(max_guesses) + ": " + str(guess))
         current += 1
 
         if(code == list(guess)):
@@ -122,8 +132,13 @@ def play():
             print("you lose :(")
             return 0
 
-a = 0
-for i in range(500):
-    a+=play()
-a=a/500
-print(a)
+
+play()
+
+# #haal comment weg om gemiddeld aantal beurten te zien (kan even duren voor expected size strategy)
+# a = 0
+# for i in range(20000):
+#     print(str(i) + "/20000")
+#     a+=play()
+# a=a/20000
+# print(a)
